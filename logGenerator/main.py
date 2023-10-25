@@ -40,7 +40,7 @@ def randomLogLevelGenerator(LogLevels, FrecuencyDistribution):
     raise ValueError("Invalid frequency distribution")
 
 
-def formatLogMessage(timestamp, logLevel, logMessage, logStartChart='{', logEndChar='}', delimiter='-'):
+def formatLogMessage(timestamp, logLevel, logMessage, logStartChart='{', logEndChar='}', delimiter='-') -> str:
     """
     This function returns a formatted log message.
     """
@@ -51,7 +51,7 @@ def formatLogMessage(timestamp, logLevel, logMessage, logStartChart='{', logEndC
     return f"{logStartChart}\"{timestamp}\" {delimiter} \"{logLevel}\" {delimiter} \"{logMessage}\"{logEndChar}"
 
 
-def generateRandomIntervals(startTime, endTime, n):
+def generateRandomIntervals(startTime, endTime, n) -> list:
     intervals = []
 
     # Calculate the total time span in hours
@@ -71,7 +71,7 @@ def generateRandomIntervals(startTime, endTime, n):
     return intervals
 
 
-def generateLogSample(logStartTimestamp, logEndTimestamp, logIntervalSeconds, randomLogTimestampShift, logLevels, logLevelFrecuencyDistribution, standardErrorMessage, outputFilePath):
+def generateLogSample(logStartTimestamp, logEndTimestamp, logIntervalSeconds, randomLogTimestampShift, logLevels, logLevelFrecuencyDistribution, standardErrorMessage, outputFilePath) -> bool:
 
     generatedLogLines = []
 
@@ -106,7 +106,7 @@ def enterToContinue(message="Press enter to continue..."):
     input(message)
 
 
-def loadConfigFromFile(configFilePath):
+def loadConfigFromFile(configFilePath) -> tuple:
     print(f"Attempting to load config from {configFilePath}")
 
     try:
