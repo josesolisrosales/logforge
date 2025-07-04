@@ -229,7 +229,7 @@ Configuration: 10M logs, batch_size=100,000, workers=1
 Duration: 85.04 seconds  
 Logs per second: 117,592
 Peak memory: 969.4 MB
-Peak CPU: 106.5%
+Peak CPU: 106.6%
 ```
 
 #### Performance Factors
