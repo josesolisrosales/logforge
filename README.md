@@ -201,7 +201,7 @@ Key options:
 
 ## 🏆 Performance
 
-LogSmith is designed for high performance:
+LogForge is designed for high performance:
 
 - **250K+ logs per second** in optimal conditions
 - **100K-150K logs per second** in typical usage

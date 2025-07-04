@@ -182,7 +182,7 @@ class SyslogFormatter(BaseFormatter):
         else:
             timestamp_str = str(timestamp)
 
-        process = log_entry.get("process", "logsmith")
+        process = log_entry.get("process", "logforge")
         pid = log_entry.get("pid", "1234")
         message = log_entry.get("message", "")
 
@@ -289,7 +289,7 @@ class CEFFormatter(BaseFormatter):
 
     def __init__(
         self,
-        device_vendor: str = "LogSmith",
+        device_vendor: str = "LogForge",
         device_product: str = "LogGenerator",
         device_version: str = "1.0",
         signature_id: str = "0",

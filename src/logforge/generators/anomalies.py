@@ -1,4 +1,4 @@
-"""Anomaly injection system for LogSmith."""
+"""Anomaly injection system for LogForge."""
 
 import random
 import re

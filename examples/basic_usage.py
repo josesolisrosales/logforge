@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-Basic usage examples for LogSmith.
+Basic usage examples for LogForge.
 
-This script demonstrates the basic functionality of LogSmith
+This script demonstrates the basic functionality of LogForge
 for generating logs programmatically.
 """
 
@@ -212,7 +212,7 @@ def main():
     # Create output directory
     Path("examples/output").mkdir(parents=True, exist_ok=True)
     
-    print("LogSmith Basic Usage Examples")
+    print("LogForge Basic Usage Examples")
     print("=" * 40)
     print()
     

@@ -1,4 +1,4 @@
-"""Configuration management for LogSmith."""
+"""Configuration management for LogForge."""
 
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Union, Any
@@ -291,7 +291,7 @@ class PerformanceConfig(BaseModel):
 
 
 class LogConfig(BaseModel):
-    """Main configuration class for LogSmith."""
+    """Main configuration class for LogForge."""
 
     # Core settings
     total_logs: PositiveInt = Field(

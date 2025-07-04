@@ -34,7 +34,7 @@ class TestCLI:
         """Test CLI help command."""
         result = self.runner.invoke(cli, ['--help'])
         assert result.exit_code == 0
-        assert "LogSmith" in result.output
+        assert "LogForge" in result.output
         assert "generate" in result.output
         assert "benchmark" in result.output
 
@@ -48,7 +48,7 @@ class TestGenerateCommand:
 
     def test_generate_basic(self):
         """Test basic generate command."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -71,7 +71,7 @@ class TestGenerateCommand:
             temp_path = f.name
 
         try:
-            with patch('logsmith.cli.LogGenerator') as mock_generator:
+            with patch('logforge.cli.LogGenerator') as mock_generator:
                 mock_instance = Mock()
                 mock_generator.return_value = mock_instance
                 mock_instance.validate_config.return_value = []
@@ -98,7 +98,7 @@ class TestGenerateCommand:
 
     def test_generate_with_json_format(self):
         """Test generate command with JSON format."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -122,7 +122,7 @@ class TestGenerateCommand:
 
     def test_generate_with_compression(self):
         """Test generate command with compression."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -148,7 +148,7 @@ class TestGenerateCommand:
         """Test generate command with custom fields."""
         custom_fields = '{"app": "test", "version": "1.0"}'
 
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -174,7 +174,7 @@ class TestGenerateCommand:
         """Test generate command with level distribution."""
         level_dist = '{"INFO": 0.8, "ERROR": 0.2}'
 
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -209,7 +209,7 @@ class TestGenerateCommand:
             config_path = f.name
 
         try:
-            with patch('logsmith.cli.LogGenerator') as mock_generator:
+            with patch('logforge.cli.LogGenerator') as mock_generator:
                 mock_instance = Mock()
                 mock_generator.return_value = mock_instance
                 mock_instance.validate_config.return_value = []
@@ -234,7 +234,7 @@ class TestGenerateCommand:
 
     def test_generate_validate_only(self):
         """Test generate command with validate-only flag."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -246,7 +246,7 @@ class TestGenerateCommand:
 
     def test_generate_with_warnings(self):
         """Test generate command with configuration warnings."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = ["Test warning"]
@@ -264,7 +264,7 @@ class TestGenerateCommand:
 
     def test_generate_benchmark_mode(self):
         """Test generate command in benchmark mode."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -321,7 +321,7 @@ class TestBenchmarkCommand:
 
     def test_benchmark_basic(self):
         """Test basic benchmark command."""
-        with patch('logsmith.cli.BenchmarkRunner') as mock_runner:
+        with patch('logforge.cli.BenchmarkRunner') as mock_runner:
             mock_runner.run_generation_benchmark.return_value = {
                 'iterations': 3,
                 'avg_duration': 1.0,
@@ -341,7 +341,7 @@ class TestBenchmarkCommand:
 
     def test_benchmark_with_options(self):
         """Test benchmark command with options."""
-        with patch('logsmith.cli.BenchmarkRunner') as mock_runner:
+        with patch('logforge.cli.BenchmarkRunner') as mock_runner:
             mock_runner.run_generation_benchmark.return_value = {
                 'iterations': 5,
                 'avg_duration': 1.0,
@@ -382,7 +382,7 @@ class TestBenchmarkCommand:
             temp_path = f.name
 
         try:
-            with patch('logsmith.cli.BenchmarkRunner') as mock_runner:
+            with patch('logforge.cli.BenchmarkRunner') as mock_runner:
                 mock_results = {
                     'iterations': 3,
                     'avg_duration': 1.0,
@@ -484,7 +484,7 @@ class TestValidateConfigCommand:
             config_path = f.name
 
         try:
-            with patch('logsmith.cli.LogGenerator') as mock_generator:
+            with patch('logforge.cli.LogGenerator') as mock_generator:
                 mock_instance = Mock()
                 mock_generator.return_value = mock_instance
                 mock_instance.validate_config.return_value = []
@@ -505,7 +505,7 @@ class TestValidateConfigCommand:
             config_path = f.name
 
         try:
-            with patch('logsmith.cli.LogGenerator') as mock_generator:
+            with patch('logforge.cli.LogGenerator') as mock_generator:
                 mock_instance = Mock()
                 mock_generator.return_value = mock_instance
                 mock_instance.validate_config.return_value = ["Test warning"]
@@ -572,7 +572,7 @@ class TestAnomalyParameters:
 
     def test_generate_with_seed(self):
         """Test generate command with seed parameter."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -589,7 +589,7 @@ class TestAnomalyParameters:
 
     def test_generate_with_anomalies_enabled(self):
         """Test generate command with anomalies enabled."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -606,7 +606,7 @@ class TestAnomalyParameters:
 
     def test_generate_with_anomaly_rate(self):
         """Test generate command with custom anomaly rate."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -639,7 +639,7 @@ class TestAnomalyParameters:
             anomaly_config_path = f.name
 
         try:
-            with patch('logsmith.cli.LogGenerator') as mock_generator:
+            with patch('logforge.cli.LogGenerator') as mock_generator:
                 mock_instance = Mock()
                 mock_generator.return_value = mock_instance
                 mock_instance.validate_config.return_value = []
@@ -700,7 +700,7 @@ class TestAnomalyParameters:
 
     def test_combined_anomaly_parameters(self):
         """Test generate command with multiple anomaly parameters."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []
@@ -732,7 +732,7 @@ class TestAnomalyParameters:
 
     def test_seed_determinism_via_cli(self):
         """Test that same seed produces deterministic results via CLI."""
-        with patch('logsmith.cli.LogGenerator') as mock_generator:
+        with patch('logforge.cli.LogGenerator') as mock_generator:
             mock_instance = Mock()
             mock_generator.return_value = mock_instance
             mock_instance.validate_config.return_value = []

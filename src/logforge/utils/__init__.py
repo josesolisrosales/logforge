@@ -1,1 +1,1 @@
-"""Utility modules for LogSmith."""
+"""Utility modules for LogForge."""

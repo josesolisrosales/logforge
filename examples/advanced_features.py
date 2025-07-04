@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Advanced features examples for LogSmith.
+Advanced features examples for LogForge.
 
 This script demonstrates advanced functionality including
 configuration management, performance optimization, and
@@ -337,7 +337,7 @@ def main():
     # Create output directory
     Path("examples/output").mkdir(parents=True, exist_ok=True)
     
-    print("LogSmith Advanced Features Examples")
+    print("LogForge Advanced Features Examples")
     print("=" * 50)
     print()
     

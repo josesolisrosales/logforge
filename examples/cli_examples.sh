@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# LogSmith CLI Examples
+# LogForge CLI Examples
 # This script demonstrates various CLI usage patterns
 
-echo "LogSmith CLI Examples"
+echo "LogForge CLI Examples"
 echo "===================="
 echo ""
 

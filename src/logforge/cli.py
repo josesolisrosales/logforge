@@ -1,4 +1,4 @@
-"""Command-line interface for LogSmith."""
+"""Command-line interface for LogForge."""
 
 import sys
 import json
@@ -113,7 +113,7 @@ def validate_file_path(ctx, param, value):
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def cli(ctx, verbose):
-    """LogSmith - High-performance log generator for testing and simulation."""
+    """LogForge - High-performance log generator for testing and simulation."""
     ctx.ensure_object(dict)
     ctx.obj['verbose'] = verbose
 
@@ -386,7 +386,7 @@ def benchmark(count, format, iterations, workers, output, log_output):
 @click.option(
     '--output',
     '-o',
-    default='logsmith-config.json',
+    default='logforge-config.json',
     help='Output configuration file path',
 )
 @click.option('--format', '-f', default='standard', help='Default log format')

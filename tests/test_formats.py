@@ -394,7 +394,7 @@ class TestCEFFormatter:
 
         result = formatter.format(log_entry)
         assert result.startswith("CEF:0|")
-        assert "LogSmith" in result
+        assert "LogForge" in result
         assert "LogGenerator" in result
         assert "Test event" in result
 
