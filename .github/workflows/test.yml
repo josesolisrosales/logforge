@@ -29,18 +29,18 @@ jobs:
     - name: Lint with flake8
       run: |
         # Stop the build if there are Python syntax errors or undefined names
-        flake8 src/logsmith --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/logforge --count --select=E9,F63,F7,F82 --show-source --statistics
         # Exit-zero treats all errors as warnings
-        flake8 src/logsmith --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
+        flake8 src/logforge --count --exit-zero --max-complexity=10 --max-line-length=88 --statistics
 
     - name: Type check with mypy
       run: |
-        mypy src/logsmith --ignore-missing-imports || true
+        mypy src/logforge --ignore-missing-imports || true
 
     - name: Test with pytest
       run: |
         # Run tests excluding problematic I/O capture tests
-        python -m pytest tests/test_config.py tests/test_anomalies.py tests/test_cli.py -v --cov=logsmith --cov-report=xml --cov-report=term-missing
+        python -m pytest tests/test_config.py tests/test_anomalies.py tests/test_cli.py -v --cov=logforge --cov-report=xml --cov-report=term-missing
         
         # Run generator tests separately without coverage to avoid I/O issues
         python -m pytest tests/test_generator.py::TestLogGenerator::test_init -v --no-cov || true
