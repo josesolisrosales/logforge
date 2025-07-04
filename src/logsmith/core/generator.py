@@ -20,6 +20,7 @@ from faker import Faker
 from logsmith.core.config import LogConfig
 from logsmith.core.formats import FormatterFactory, LogFormat
 from logsmith.generators.data import DataGenerator
+from logsmith.generators.anomalies import AnomalyInjector
 from logsmith.utils.performance import PerformanceMonitor
 
 
@@ -28,13 +29,40 @@ class LogGenerator:
     
     def __init__(self, config: LogConfig):
         self.config = config
+        
+        # Initialize random seeds for deterministic generation
+        self._initialize_seeds()
+        
         self.formatter = FormatterFactory.create_formatter(config.output.format)
         self.data_generator = DataGenerator(config)
         self.performance_monitor = PerformanceMonitor()
         self.fake = Faker()
+        if self.config.seed is not None:
+            self.fake.seed_instance(self.config.seed)
+        
+        # Initialize anomaly injector
+        start_time = config.get_effective_start_time()
+        total_duration = config.get_total_duration()
+        self.anomaly_injector = AnomalyInjector(
+            config.anomaly_config, 
+            config.output.format,
+            start_time,
+            total_duration
+        )
         
         # Pre-compute values for better performance
         self._precompute_data()
+    
+    def _initialize_seeds(self):
+        """Initialize random seeds for deterministic generation."""
+        if self.config.seed is not None:
+            # Set global Python random seed
+            random.seed(self.config.seed)
+            
+            # Set NumPy random seed
+            np.random.seed(self.config.seed)
+            
+            # Faker will be seeded separately since it uses its own instance
     
     def _precompute_data(self):
         """Pre-compute data for better performance."""
@@ -117,11 +145,25 @@ class LogGenerator:
         # Add generated fields
         log_entry.update(self.data_generator.generate_additional_fields())
         
+        # Check for anomaly injection
+        anomaly = self.anomaly_injector.generate_anomaly(timestamp, log_entry)
+        if anomaly:
+            log_entry = self.anomaly_injector.apply_anomaly_to_log(log_entry, anomaly)
+        
         return log_entry
     
     def generate_batch(self, batch_size: int, 
                       start_idx: int = 0) -> Iterator[Dict[str, Any]]:
         """Generate a batch of log entries."""
+        # Reset seeds at the start of each batch for deterministic generation
+        if self.config.seed is not None:
+            # Use a deterministic seed that incorporates the start_idx
+            # This ensures each batch starts from a predictable state
+            batch_seed = self.config.seed + start_idx
+            random.seed(batch_seed)
+            np.random.seed(batch_seed)
+            self.fake.seed_instance(batch_seed)
+            
         for i in range(batch_size):
             idx = start_idx + i
             

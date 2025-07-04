@@ -421,3 +421,207 @@ class TestLogGenerator:
         for message in messages:
             assert isinstance(message, str)
             assert len(message) > 0
+    
+    def test_seed_determinism(self):
+        """Test deterministic generation with seed."""
+        config1 = LogConfig(total_logs=10, seed=42)
+        config2 = LogConfig(total_logs=10, seed=42)
+        
+        generator1 = LogGenerator(config1)
+        generator2 = LogGenerator(config2)
+        
+        # Generate logs with same seed
+        batch1 = list(generator1.generate_batch(10))
+        batch2 = list(generator2.generate_batch(10))
+        
+        # Should generate identical logs
+        assert len(batch1) == len(batch2)
+        for log1, log2 in zip(batch1, batch2):
+            assert log1["level"] == log2["level"]
+            assert log1["message"] == log2["message"]
+    
+    def test_different_seeds(self):
+        """Test different seeds produce different results."""
+        config1 = LogConfig(total_logs=10, seed=42)
+        config2 = LogConfig(total_logs=10, seed=123)
+        
+        generator1 = LogGenerator(config1)
+        generator2 = LogGenerator(config2)
+        
+        # Generate logs with different seeds
+        batch1 = list(generator1.generate_batch(10))
+        batch2 = list(generator2.generate_batch(10))
+        
+        # Should generate different logs
+        assert len(batch1) == len(batch2)
+        different_count = 0
+        for log1, log2 in zip(batch1, batch2):
+            if log1["level"] != log2["level"] or log1["message"] != log2["message"]:
+                different_count += 1
+        
+        assert different_count > 0  # Should have some differences
+    
+    def test_anomaly_injection_disabled(self):
+        """Test log generation with anomaly injection disabled."""
+        config = LogConfig(total_logs=10)
+        config.anomaly_config.enabled = False
+        
+        generator = LogGenerator(config)
+        log_entry = generator.generate_single_log()
+        
+        # Should not have anomaly field
+        assert "anomaly" not in log_entry
+        assert "timestamp" in log_entry
+        assert "level" in log_entry
+        assert "message" in log_entry
+    
+    def test_anomaly_injection_enabled(self):
+        """Test log generation with anomaly injection enabled."""
+        config = LogConfig(total_logs=50, seed=42)
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 1.0  # Force anomaly generation
+        
+        generator = LogGenerator(config)
+        
+        # Generate multiple logs to ensure at least some have anomalies
+        batch = list(generator.generate_batch(50))
+        
+        anomaly_count = 0
+        for log_entry in batch:
+            if "anomaly" in log_entry:
+                anomaly_count += 1
+                # Verify anomaly structure
+                assert "type" in log_entry["anomaly"]
+                assert "severity" in log_entry["anomaly"]
+                assert 0.0 <= log_entry["anomaly"]["severity"] <= 1.0
+        
+        # With rate=1.0, most logs should have anomalies (but some randomness)
+        assert anomaly_count > 30  # At least 60% should have anomalies
+    
+    def test_format_specific_anomalies(self):
+        """Test format-specific anomaly generation."""
+        # Test Apache format anomalies
+        config = LogConfig(total_logs=20, seed=42)
+        config.output.format = "apache_common"
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 1.0
+        
+        generator = LogGenerator(config)
+        batch = list(generator.generate_batch(20))
+        
+        for log_entry in batch:
+            if "anomaly" in log_entry:
+                anomaly_type = log_entry["anomaly"]["type"]
+                # Should be Apache-relevant anomaly types
+                assert anomaly_type in [
+                    "failed_auth", "brute_force", "suspicious_access", 
+                    "service_unavailable", "unusual_volume"
+                ]
+                
+                # Apache logs with auth failures should have 401 status
+                if anomaly_type == "failed_auth":
+                    assert log_entry.get("status_code") == 401
+    
+    def test_json_format_anomalies(self):
+        """Test JSON format anomaly generation."""
+        config = LogConfig(total_logs=20, seed=42)
+        config.output.format = "json"
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 1.0
+        
+        generator = LogGenerator(config)
+        batch = list(generator.generate_batch(20))
+        
+        for log_entry in batch:
+            if "anomaly" in log_entry:
+                anomaly_type = log_entry["anomaly"]["type"]
+                # Should be JSON-relevant anomaly types
+                assert anomaly_type in [
+                    "high_latency", "memory_spike", "cpu_spike", 
+                    "slow_query", "database_error", "user_behavior"
+                ]
+                
+                # High latency anomalies should have response_time field
+                if anomaly_type == "high_latency":
+                    assert "response_time" in log_entry
+                    assert log_entry["response_time"] > 1000  # Should be high
+    
+    def test_anomaly_severity_range(self):
+        """Test anomaly severity is within valid range."""
+        config = LogConfig(total_logs=30, seed=42)
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 0.8
+        
+        generator = LogGenerator(config)
+        batch = list(generator.generate_batch(30))
+        
+        severities = []
+        for log_entry in batch:
+            if "anomaly" in log_entry:
+                severity = log_entry["anomaly"]["severity"]
+                severities.append(severity)
+                assert 0.0 <= severity <= 1.0
+        
+        # Should have some variety in severity levels
+        assert len(severities) > 5
+        assert len(set(severities)) > 1  # Should have different severity values
+    
+    def test_anomaly_metadata_presence(self):
+        """Test that anomalies include relevant metadata."""
+        config = LogConfig(total_logs=20, seed=42)
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 1.0
+        
+        generator = LogGenerator(config)
+        batch = list(generator.generate_batch(20))
+        
+        metadata_found = False
+        for log_entry in batch:
+            if "anomaly" in log_entry:
+                anomaly = log_entry["anomaly"]
+                
+                # Basic fields should always be present
+                assert "type" in anomaly
+                assert "severity" in anomaly
+                
+                # Type-specific metadata should be present
+                if anomaly["type"] == "high_latency":
+                    assert "response_time" in anomaly
+                    assert "normal_response_time" in anomaly
+                    metadata_found = True
+                elif anomaly["type"] == "memory_spike":
+                    assert "memory_usage" in anomaly
+                    assert "memory_threshold" in anomaly
+                    metadata_found = True
+                elif anomaly["type"] == "failed_auth":
+                    assert "failed_attempts" in anomaly
+                    assert "auth_method" in anomaly
+                    metadata_found = True
+        
+        assert metadata_found  # Should have found at least one anomaly with metadata
+    
+    def test_anomaly_injector_initialization(self):
+        """Test that anomaly injector is properly initialized."""
+        config = LogConfig(total_logs=10, seed=42)
+        config.anomaly_config.enabled = True
+        
+        generator = LogGenerator(config)
+        
+        # Should have anomaly injector
+        assert hasattr(generator, 'anomaly_injector')
+        assert generator.anomaly_injector is not None
+        assert generator.anomaly_injector.config == config.anomaly_config
+        assert generator.anomaly_injector.log_format == config.output.format
+    
+    def test_validate_config_with_anomalies(self):
+        """Test configuration validation with anomalies enabled."""
+        config = LogConfig(total_logs=1000)
+        config.anomaly_config.enabled = True
+        config.anomaly_config.base_rate = 0.1
+        
+        generator = LogGenerator(config)
+        warnings = generator.validate_config()
+        
+        # Basic config should not generate warnings
+        assert isinstance(warnings, list)
+        # Anomaly-specific warnings would be added here if needed

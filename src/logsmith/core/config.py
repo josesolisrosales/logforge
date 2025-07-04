@@ -143,10 +143,16 @@ class AnomalyConfig(BaseModel):
     anomaly_types: Dict[AnomalyType, AnomalyTypeConfig] = Field(
         default_factory=lambda: {
             AnomalyType.FAILED_AUTH: AnomalyTypeConfig(weight=0.3),
+            AnomalyType.BRUTE_FORCE: AnomalyTypeConfig(weight=0.25),
+            AnomalyType.SUSPICIOUS_ACCESS: AnomalyTypeConfig(weight=0.2),
             AnomalyType.HIGH_LATENCY: AnomalyTypeConfig(weight=0.2),
             AnomalyType.MEMORY_SPIKE: AnomalyTypeConfig(weight=0.2),
             AnomalyType.UNUSUAL_VOLUME: AnomalyTypeConfig(weight=0.15),
             AnomalyType.SERVICE_UNAVAILABLE: AnomalyTypeConfig(weight=0.15),
+            AnomalyType.CPU_SPIKE: AnomalyTypeConfig(weight=0.15),
+            AnomalyType.SLOW_QUERY: AnomalyTypeConfig(weight=0.1),
+            AnomalyType.DATABASE_ERROR: AnomalyTypeConfig(weight=0.1),
+            AnomalyType.USER_BEHAVIOR: AnomalyTypeConfig(weight=0.1),
         },
         description="Configuration for each anomaly type"
     )

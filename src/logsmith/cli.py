@@ -83,14 +83,18 @@ def cli(ctx, verbose):
 @click.option('--level-dist', help='Log level distribution (JSON string)')
 @click.option('--message-templates', help='Message templates file path')
 @click.option('--custom-fields', help='Custom fields (JSON string)')
+@click.option('--seed', type=int, help='Random seed for deterministic generation')
+@click.option('--anomalies', is_flag=True, help='Enable anomaly injection')
+@click.option('--anomaly-rate', type=float, help='Base anomaly rate (0.0-1.0)')
+@click.option('--anomaly-config', help='Anomaly configuration file path')
 @click.option('--no-progress', is_flag=True, help='Disable progress bar')
 @click.option('--benchmark', is_flag=True, help='Run in benchmark mode')
 @click.option('--validate-only', is_flag=True, help='Only validate configuration')
 @click.pass_context
 def generate(ctx, count, format, output, start_time, end_time, duration, interval,
              jitter, batch_size, workers, compression, config, level_dist,
-             message_templates, custom_fields, no_progress, benchmark,
-             validate_only):
+             message_templates, custom_fields, seed, anomalies, anomaly_rate,
+             anomaly_config, no_progress, benchmark, validate_only):
     """Generate logs with specified parameters."""
     
     try:
@@ -153,6 +157,31 @@ def generate(ctx, count, format, output, start_time, end_time, duration, interva
             except (FileNotFoundError, json.JSONDecodeError) as e:
                 raise click.BadParameter(f"Invalid message templates file: {e}")
         
+        # Handle seed parameter
+        if seed is not None:
+            log_config.seed = seed
+        
+        # Handle anomaly parameters
+        if anomalies:
+            log_config.anomaly_config.enabled = True
+            
+        if anomaly_rate is not None:
+            if not 0.0 <= anomaly_rate <= 1.0:
+                raise click.BadParameter("Anomaly rate must be between 0.0 and 1.0")
+            log_config.anomaly_config.base_rate = anomaly_rate
+            
+        # Load anomaly configuration file
+        if anomaly_config:
+            try:
+                with open(anomaly_config, 'r') as f:
+                    anomaly_data = json.load(f)
+                # Update anomaly config with file contents
+                for key, value in anomaly_data.items():
+                    if hasattr(log_config.anomaly_config, key):
+                        setattr(log_config.anomaly_config, key, value)
+            except (FileNotFoundError, json.JSONDecodeError) as e:
+                raise click.BadParameter(f"Invalid anomaly configuration file: {e}")
+        
         # Create generator
         generator = LogGenerator(log_config)
         
@@ -175,7 +204,8 @@ def generate(ctx, count, format, output, start_time, end_time, duration, interva
             return
         
         # Show configuration summary
-        if ctx.obj.get('verbose') or benchmark:
+        verbose = ctx.obj.get('verbose') if ctx.obj else False
+        if verbose or benchmark:
             _show_config_summary(log_config)
         
         # Run benchmark if requested
@@ -209,13 +239,15 @@ def generate(ctx, count, format, output, start_time, end_time, duration, interva
     except Exception as e:
         try:
             console.print(f"❌ Error: {e}", style="red")
-            if ctx.obj.get('verbose'):
+            verbose = ctx.obj.get('verbose') if ctx.obj else False
+            if verbose:
                 import traceback
                 console.print(traceback.format_exc())
         except (ValueError, OSError):
             # Fallback if Rich console fails
             print(f"ERROR: {e}")
-            if ctx.obj.get('verbose'):
+            verbose = ctx.obj.get('verbose') if ctx.obj else False
+            if verbose:
                 import traceback
                 traceback.print_exc()
         sys.exit(1)

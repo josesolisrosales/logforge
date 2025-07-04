@@ -16,6 +16,11 @@ class DataGenerator:
         self.config = config
         self.fake = Faker()
         
+        # Apply seed if configured
+        if hasattr(config, 'seed') and config.seed is not None:
+            random.seed(config.seed)
+            self.fake.seed_instance(config.seed)
+        
         # Pre-generate common data for better performance
         self._pregenerate_data()
     

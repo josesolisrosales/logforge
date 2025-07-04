@@ -8,7 +8,10 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from logsmith.core.config import LogConfig, LogLevelDistribution, TimeConfig, OutputConfig, PerformanceConfig
+from logsmith.core.config import (
+    LogConfig, LogLevelDistribution, TimeConfig, OutputConfig, PerformanceConfig,
+    AnomalyConfig, AnomalyType, TemporalPattern, AnomalyPatternConfig, AnomalyTypeConfig
+)
 
 
 class TestLogLevelDistribution:
@@ -219,3 +222,200 @@ class TestLogConfig:
         custom_fields = {"app_name": "test", "version": "1.0"}
         config = LogConfig(custom_fields=custom_fields)
         assert config.custom_fields == custom_fields
+    
+    def test_seed_parameter(self):
+        """Test seed parameter."""
+        config = LogConfig(seed=42)
+        assert config.seed == 42
+    
+    def test_anomaly_config_default(self):
+        """Test default anomaly configuration."""
+        config = LogConfig()
+        assert hasattr(config, 'anomaly_config')
+        assert isinstance(config.anomaly_config, AnomalyConfig)
+        assert config.anomaly_config.enabled is False
+        assert config.anomaly_config.base_rate == 0.05
+
+
+class TestAnomalyType:
+    """Test AnomalyType enum."""
+    
+    def test_security_anomalies(self):
+        """Test security anomaly types."""
+        assert AnomalyType.FAILED_AUTH == "failed_auth"
+        assert AnomalyType.PRIVILEGE_ESCALATION == "privilege_escalation"
+        assert AnomalyType.BRUTE_FORCE == "brute_force"
+    
+    def test_performance_anomalies(self):
+        """Test performance anomaly types."""
+        assert AnomalyType.HIGH_LATENCY == "high_latency"
+        assert AnomalyType.MEMORY_SPIKE == "memory_spike"
+        assert AnomalyType.CPU_SPIKE == "cpu_spike"
+    
+    def test_system_anomalies(self):
+        """Test system anomaly types."""
+        assert AnomalyType.SERVICE_UNAVAILABLE == "service_unavailable"
+        assert AnomalyType.DATABASE_ERROR == "database_error"
+        assert AnomalyType.NETWORK_ERROR == "network_error"
+
+
+class TestTemporalPattern:
+    """Test TemporalPattern enum."""
+    
+    def test_pattern_types(self):
+        """Test temporal pattern types."""
+        assert TemporalPattern.CONSTANT == "constant"
+        assert TemporalPattern.BURST == "burst"
+        assert TemporalPattern.GRADUAL_INCREASE == "gradual_increase"
+        assert TemporalPattern.PERIODIC == "periodic"
+        assert TemporalPattern.SPIKE == "spike"
+
+
+class TestAnomalyPatternConfig:
+    """Test AnomalyPatternConfig class."""
+    
+    def test_basic_pattern(self):
+        """Test basic pattern configuration."""
+        pattern = AnomalyPatternConfig(
+            pattern_type=TemporalPattern.BURST,
+            anomaly_types=[AnomalyType.FAILED_AUTH, AnomalyType.BRUTE_FORCE]
+        )
+        
+        assert pattern.pattern_type == TemporalPattern.BURST
+        assert AnomalyType.FAILED_AUTH in pattern.anomaly_types
+        assert pattern.base_rate == 0.05
+    
+    def test_pattern_with_peak_rate(self):
+        """Test pattern with peak rate."""
+        pattern = AnomalyPatternConfig(
+            pattern_type=TemporalPattern.BURST,
+            anomaly_types=[AnomalyType.HIGH_LATENCY],
+            base_rate=0.1,
+            peak_rate=0.5
+        )
+        
+        assert pattern.base_rate == 0.1
+        assert pattern.peak_rate == 0.5
+    
+    def test_invalid_peak_rate(self):
+        """Test invalid peak rate validation."""
+        with pytest.raises(ValidationError):
+            AnomalyPatternConfig(
+                pattern_type=TemporalPattern.BURST,
+                anomaly_types=[AnomalyType.HIGH_LATENCY],
+                base_rate=0.3,
+                peak_rate=0.1  # Peak rate less than base rate
+            )
+
+
+class TestAnomalyTypeConfig:
+    """Test AnomalyTypeConfig class."""
+    
+    def test_default_config(self):
+        """Test default anomaly type configuration."""
+        config = AnomalyTypeConfig()
+        
+        assert config.weight == 1.0
+        assert config.severity_range == (0.1, 1.0)
+        assert config.format_specific == {}
+        assert config.correlation_groups == []
+    
+    def test_custom_config(self):
+        """Test custom anomaly type configuration."""
+        config = AnomalyTypeConfig(
+            weight=0.5,
+            severity_range=(0.2, 0.8),
+            format_specific={"apache": {"status_codes": [401, 403]}},
+            correlation_groups=["auth_failures"]
+        )
+        
+        assert config.weight == 0.5
+        assert config.severity_range == (0.2, 0.8)
+        assert config.format_specific["apache"]["status_codes"] == [401, 403]
+        assert "auth_failures" in config.correlation_groups
+
+
+class TestAnomalyConfig:
+    """Test AnomalyConfig class."""
+    
+    def test_default_config(self):
+        """Test default anomaly configuration."""
+        config = AnomalyConfig()
+        
+        assert config.enabled is False
+        assert config.seed is None
+        assert config.base_rate == 0.05
+        assert config.patterns == []
+        assert isinstance(config.anomaly_types, dict)
+        assert isinstance(config.format_mappings, dict)
+    
+    def test_enabled_config(self):
+        """Test enabled anomaly configuration."""
+        config = AnomalyConfig(
+            enabled=True,
+            seed=42,
+            base_rate=0.1
+        )
+        
+        assert config.enabled is True
+        assert config.seed == 42
+        assert config.base_rate == 0.1
+    
+    def test_with_patterns(self):
+        """Test anomaly configuration with patterns."""
+        pattern = AnomalyPatternConfig(
+            pattern_type=TemporalPattern.BURST,
+            anomaly_types=[AnomalyType.FAILED_AUTH],
+            duration="5m"
+        )
+        
+        config = AnomalyConfig(
+            enabled=True,
+            patterns=[pattern]
+        )
+        
+        assert len(config.patterns) == 1
+        assert config.patterns[0].pattern_type == TemporalPattern.BURST
+        assert config.patterns[0].duration == "5m"
+    
+    def test_format_mappings(self):
+        """Test format-specific anomaly mappings."""
+        config = AnomalyConfig()
+        
+        # Check default mappings exist
+        assert "apache_common" in config.format_mappings
+        assert "json" in config.format_mappings
+        assert "syslog" in config.format_mappings
+        
+        # Check that mapped anomaly types are valid
+        for format_name, anomaly_types in config.format_mappings.items():
+            for anomaly_type in anomaly_types:
+                assert isinstance(anomaly_type, AnomalyType)
+    
+    def test_anomaly_types_config(self):
+        """Test anomaly types configuration."""
+        config = AnomalyConfig()
+        
+        # Check default anomaly types
+        assert AnomalyType.FAILED_AUTH in config.anomaly_types
+        assert AnomalyType.HIGH_LATENCY in config.anomaly_types
+        
+        # Check that all are AnomalyTypeConfig instances
+        for anomaly_type, type_config in config.anomaly_types.items():
+            assert isinstance(anomaly_type, AnomalyType)
+            assert isinstance(type_config, AnomalyTypeConfig)
+    
+    def test_invalid_base_rate(self):
+        """Test invalid base rate validation."""
+        with pytest.raises(ValidationError):
+            AnomalyConfig(base_rate=1.5)  # Rate > 1.0
+        
+        with pytest.raises(ValidationError):
+            AnomalyConfig(base_rate=-0.1)  # Negative rate
+    
+    def test_correlation_config(self):
+        """Test correlation configuration."""
+        config = AnomalyConfig()
+        
+        assert config.correlation_probability == 0.3
+        assert config.correlation_window == "5m"
