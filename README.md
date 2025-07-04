@@ -5,12 +5,16 @@ A high-performance, professional-grade log generator for testing, simulation, an
 [![PyPI version](https://badge.fury.io/py/logsmith.svg)](https://badge.fury.io/py/logsmith)
 [![Python Support](https://img.shields.io/pypi/pyversions/logsmith.svg)](https://pypi.org/project/logsmith/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Tests](https://github.com/josesolisrosales/logsmith/workflows/Tests/badge.svg)](https://github.com/josesolisrosales/logsmith/actions)
+[![Code Quality](https://github.com/josesolisrosales/logsmith/workflows/Code%20Quality/badge.svg)](https://github.com/josesolisrosales/logsmith/actions)
 
 ## 🚀 Features
 
 - **High Performance**: Generate 250K+ logs per second
 - **Multiple Formats**: Support for JSON, Apache, Nginx, Syslog, CSV, and more
 - **Realistic Data**: Generate realistic IPs, user agents, timestamps, and messages
+- **Anomaly Detection**: Advanced anomaly injection for ML training with temporal patterns
+- **Deterministic Generation**: Seed-based reproducible log generation
 - **Configurable**: Highly customizable through config files or CLI options
 - **Memory Efficient**: Batch processing and streaming output
 - **Parallel Processing**: Multi-core support for maximum performance
@@ -246,6 +250,54 @@ Run your own benchmark:
 logsmith benchmark --count 10000000 --format json --iterations 3
 ```
 
+## 🔍 Anomaly Detection
+
+LogSmith includes advanced anomaly injection capabilities for ML training data generation:
+
+### Generate Logs with Anomalies
+
+```bash
+# Enable anomaly injection with 20% anomaly rate
+logsmith generate --count 10000 --anomalies --anomaly-rate 0.2 --seed 42
+
+# Use external anomaly configuration
+logsmith generate --count 10000 --anomaly-config anomaly_config.json
+```
+
+### Anomaly Types
+
+- **Security**: failed_auth, brute_force, suspicious_access, privilege_escalation
+- **Performance**: high_latency, memory_spike, cpu_spike, slow_query
+- **System**: service_unavailable, database_error, network_error
+- **Behavioral**: unusual_volume, geographic_anomaly, user_behavior
+
+### Temporal Patterns
+
+- **BURST**: Intense anomaly periods (simulating attacks)
+- **GRADUAL_INCREASE**: Slowly developing performance issues
+- **PERIODIC**: Regular anomaly cycles
+- **SPIKE**: Short-duration intense anomalies
+
+### Example Anomaly Configuration
+
+```json
+{
+  "enabled": true,
+  "base_rate": 0.1,
+  "seed": 42,
+  "patterns": [
+    {
+      "pattern_type": "burst",
+      "anomaly_types": ["brute_force", "failed_auth"],
+      "base_rate": 0.05,
+      "peak_rate": 0.8,
+      "duration": "10m",
+      "start_time": "5m"
+    }
+  ]
+}
+```
+
 ## 📚 Examples
 
 ### Generate Web Server Logs
@@ -351,16 +403,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - [Rich](https://github.com/Textualize/rich) for beautiful terminal output
 - [Faker](https://faker.readthedocs.io/) for realistic data generation
 - [Pydantic](https://pydantic-docs.helpmanual.io/) for configuration validation
-
-## 📈 Roadmap
-
-- [ ] Support for more log formats (CloudTrail, ELB, etc.)
-- [ ] Real-time streaming output
-- [ ] Log correlation and transaction tracing
-- [ ] Anomaly injection for testing detection systems
-- [ ] REST API for remote log generation
-- [ ] Docker image for containerized deployments
-- [ ] Kubernetes integration
 
 ---
 

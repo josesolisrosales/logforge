@@ -63,7 +63,7 @@ performance = [
 Homepage = "https://github.com/josesolisrosales/logsmith"
 Repository = "https://github.com/josesolisrosales/logsmith"
 Issues = "https://github.com/josesolisrosales/logsmith/issues"
-Documentation = "https://logsmith.readthedocs.io"
+Documentation = "https://github.com/josesolisrosales/logsmith#readme"
 
 [project.scripts]
 logsmith = "logsmith.cli:main"

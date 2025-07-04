@@ -47,6 +47,20 @@ class TestStandardFormatter:
         """Test that standard formatter has no headers."""
         formatter = StandardFormatter()
         assert formatter.get_headers() is None
+    
+    def test_string_timestamp(self):
+        """Test formatting with string timestamp."""
+        formatter = StandardFormatter()
+        log_entry = {
+            "timestamp": "2023-01-01 12:00:00",  # String instead of datetime
+            "level": "INFO",
+            "message": "Test message"
+        }
+        
+        result = formatter.format(log_entry)
+        assert "2023-01-01 12:00:00" in result
+        assert "INFO" in result
+        assert "Test message" in result
 
 
 class TestJSONFormatter:
@@ -130,6 +144,18 @@ class TestApacheCommonFormatter:
         assert "GET / HTTP/1.1" in result  # default request
         assert "200" in result  # default status
         assert "1024" in result  # default size
+    
+    def test_string_timestamp(self):
+        """Test Apache Common format with string timestamp."""
+        formatter = ApacheCommonFormatter()
+        log_entry = {
+            "timestamp": "2023-01-01 12:00:00",  # String instead of datetime
+            "host": "192.168.1.1"
+        }
+        
+        result = formatter.format(log_entry)
+        assert "192.168.1.1" in result
+        assert "[2023-01-01 12:00:00]" in result
 
 
 class TestApacheCombinedFormatter:
@@ -176,6 +202,18 @@ class TestNginxFormatter:
         assert "GET /index.html HTTP/1.1" in result
         assert "200" in result
         assert "1024" in result
+    
+    def test_string_timestamp(self):
+        """Test Nginx format with string timestamp."""
+        formatter = NginxFormatter()
+        log_entry = {
+            "timestamp": "2023-01-01 12:00:00",  # String instead of datetime
+            "remote_addr": "192.168.1.1"
+        }
+        
+        result = formatter.format(log_entry)
+        assert "192.168.1.1" in result
+        assert "[2023-01-01 12:00:00]" in result
 
 
 class TestSyslogFormatter:
@@ -208,6 +246,20 @@ class TestSyslogFormatter:
         # Priority = facility * 8 + severity
         # INFO severity = 6, so priority = 24 * 8 + 6 = 198
         assert "<198>" in result
+    
+    def test_string_timestamp(self):
+        """Test Syslog format with string timestamp."""
+        formatter = SyslogFormatter()
+        log_entry = {
+            "timestamp": "2023-01-01 12:00:00",  # String instead of datetime
+            "level": "INFO",
+            "message": "Test message"
+        }
+        
+        result = formatter.format(log_entry)
+        assert "localhost" in result
+        assert "Test message" in result
+        assert "2023-01-01 12:00:00" in result
 
 
 class TestCSVFormatter:
@@ -358,6 +410,22 @@ class TestCEFFormatter:
             log_entry = {"level": level, "message": "Test"}
             result = formatter.format(log_entry)
             assert f"|{expected_severity}|" in result
+    
+    def test_extension_fields(self):
+        """Test CEF extension fields."""
+        formatter = CEFFormatter()
+        log_entry = {
+            "level": "INFO",
+            "message": "Test event",
+            "source_ip": "192.168.1.1",
+            "timestamp": datetime(2023, 1, 1, 12, 0, 0),
+            "custom_field": "custom_value"
+        }
+        
+        result = formatter.format(log_entry)
+        assert "source_ip=192.168.1.1" in result
+        assert "timestamp=2023-01-01T12:00:00" in result
+        assert "custom_field=custom_value" in result
 
 
 class TestCustomFormatter:
@@ -390,9 +458,12 @@ class TestCustomFormatter:
             "message": "Test message"
         }
         
-        # Should not raise an error
+        # Should not raise an error and should handle missing field gracefully
         result = formatter.format(log_entry)
         assert "2023-01-01T12:00:00" in result
+        assert "[INFO]" in result
+        assert "Test message" in result
+        assert "<missing:missing_field>" in result
 
 
 class TestFormatterFactory:
@@ -428,7 +499,7 @@ class TestFormatterFactory:
     
     def test_unsupported_format(self):
         """Test unsupported format."""
-        with pytest.raises(ValueError, match="Unsupported format"):
+        with pytest.raises(ValueError, match="not a valid LogFormat"):
             # This should raise an error if we try to create a formatter for a non-existent format
             FormatterFactory.create_formatter("non_existent_format")
     
@@ -449,3 +520,15 @@ class TestFormatterFactory:
         )
         assert isinstance(formatter, JSONFormatter)
         assert formatter.pretty is True
+    
+    def test_missing_formatter_class(self):
+        """Test error when formatter class is missing from factory."""
+        # Temporarily remove a formatter to test error case
+        original_formatter = FormatterFactory._formatters.pop(LogFormat.STANDARD)
+        
+        try:
+            with pytest.raises(ValueError, match="Unsupported format"):
+                FormatterFactory.create_formatter(LogFormat.STANDARD)
+        finally:
+            # Restore the formatter
+            FormatterFactory._formatters[LogFormat.STANDARD] = original_formatter

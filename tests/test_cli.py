@@ -50,7 +50,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, ['--count', '100'])
@@ -71,7 +73,9 @@ class TestGenerateCommand:
                 mock_instance.get_performance_stats.return_value = {
                     'duration_seconds': 0.1,
                     'logs_per_second': 1000,
-                    'total_logs_generated': 100
+                    'total_logs_generated': 100,
+                    'peak_memory_usage_mb': 50.0,
+                    'peak_cpu_usage_percent': 25.0
                 }
                 
                 result = self.runner.invoke(generate, [
@@ -97,7 +101,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, [
@@ -120,7 +126,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, [
@@ -145,7 +153,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, [
@@ -170,7 +180,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, [
@@ -246,7 +258,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, ['--count', '100'])
@@ -263,7 +277,9 @@ class TestGenerateCommand:
             mock_instance.get_performance_stats.return_value = {
                 'duration_seconds': 0.1,
                 'logs_per_second': 1000,
-                'total_logs_generated': 100
+                'total_logs_generated': 100,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
             }
             
             result = self.runner.invoke(generate, [
@@ -391,7 +407,9 @@ class TestBenchmarkCommand:
                     '--output', temp_path
                 ])
                 assert result.exit_code == 0
-                assert f"Results saved to {temp_path}" in result.output
+                # Check for the essential text, ignoring formatting differences
+                assert "Results saved to" in result.output
+                assert temp_path in result.output
                 
                 # Check that results were saved
                 with open(temp_path, 'r') as f:
@@ -417,7 +435,9 @@ class TestInitConfigCommand:
         try:
             result = self.runner.invoke(init_config, ['--output', temp_path])
             assert result.exit_code == 0
-            assert f"Configuration file created: {temp_path}" in result.output
+            # Check for the essential text, ignoring formatting differences
+            assert "Configuration file created:" in result.output
+            assert temp_path in result.output
             
             # Check that config file was created
             assert Path(temp_path).exists()
@@ -706,7 +726,18 @@ class TestAnomalyParameters:
     
     def test_seed_determinism_via_cli(self):
         """Test that same seed produces deterministic results via CLI."""
-        with patch('sys.stdout', new_callable=Mock) as mock_stdout:
+        with patch('logsmith.cli.LogGenerator') as mock_generator:
+            mock_instance = Mock()
+            mock_generator.return_value = mock_instance
+            mock_instance.validate_config.return_value = []
+            mock_instance.get_performance_stats.return_value = {
+                'duration_seconds': 0.1,
+                'logs_per_second': 1000,
+                'total_logs_generated': 2,
+                'peak_memory_usage_mb': 50.0,
+                'peak_cpu_usage_percent': 25.0
+            }
+            
             # First run with seed
             result1 = self.runner.invoke(generate, [
                 '--count', '2',
@@ -726,8 +757,11 @@ class TestAnomalyParameters:
             assert result1.exit_code == 0
             assert result2.exit_code == 0
             
-            # Results should be identical (this is a basic check)
-            # In practice, we'd need to capture and compare actual output
+            # Check that seed was set in both calls
+            call_args = mock_generator.call_args_list
+            assert len(call_args) == 2
+            assert call_args[0][0][0].seed == 42
+            assert call_args[1][0][0].seed == 42
     
     def test_generate_help_includes_anomaly_options(self):
         """Test that generate help includes anomaly options."""

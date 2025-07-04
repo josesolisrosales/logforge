@@ -19,7 +19,56 @@ from logsmith.core.formats import FormatterFactory
 from logsmith.utils.performance import BenchmarkRunner, ProgressReporter
 
 
-console = Console()
+class SafeConsole:
+    """A safe console wrapper that handles test environments."""
+    
+    def __init__(self):
+        self._console = None
+        self._init_console()
+    
+    def _init_console(self):
+        """Initialize the console if possible."""
+        try:
+            self._console = Console()
+        except Exception:
+            self._console = None
+    
+    def print(self, *args, **kwargs):
+        """Print with fallback to regular print."""
+        if self._console:
+            try:
+                self._console.print(*args, **kwargs)
+            except (ValueError, OSError, AttributeError):
+                # Fallback to regular print
+                try:
+                    # Remove Rich-specific styling for basic print
+                    cleaned_args = []
+                    for arg in args:
+                        if hasattr(arg, '__rich__') or hasattr(arg, '__rich_console__'):
+                            # Convert Rich objects to plain text
+                            cleaned_args.append(str(arg).replace('\n', ' '))
+                        else:
+                            cleaned_args.append(arg)
+                    print(*cleaned_args)
+                except (ValueError, OSError):
+                    # Silently fail if stdout is closed
+                    pass
+        else:
+            try:
+                # Remove Rich-specific styling for basic print
+                cleaned_args = []
+                for arg in args:
+                    if hasattr(arg, '__rich__') or hasattr(arg, '__rich_console__'):
+                        # Convert Rich objects to plain text
+                        cleaned_args.append(str(arg).replace('\n', ' '))
+                    else:
+                        cleaned_args.append(arg)
+                print(*cleaned_args)
+            except (ValueError, OSError):
+                # Silently fail if stdout is closed
+                pass
+
+console = SafeConsole()
 
 
 def validate_format(ctx, param, value):
@@ -188,16 +237,11 @@ def generate(ctx, count, format, output, start_time, end_time, duration, interva
         # Validate configuration
         warnings = generator.validate_config()
         if warnings and not no_progress:
-            try:
-                console.print(Panel(
-                    "\n".join(f"⚠️  {w}" for w in warnings),
-                    title="Configuration Warnings",
-                    border_style="yellow"
-                ))
-            except (ValueError, OSError):
-                # Fallback for environments where Rich console fails
-                for warning in warnings:
-                    print(f"WARNING: {warning}")
+            console.print(Panel(
+                "\n".join(f"⚠️  {w}" for w in warnings),
+                title="Configuration Warnings",
+                border_style="yellow"
+            ))
         
         if validate_only:
             console.print("✅ Configuration is valid")
@@ -226,30 +270,18 @@ def generate(ctx, count, format, output, start_time, end_time, duration, interva
         if not no_progress and log_config.output.file_path:
             stats = generator.get_performance_stats()
             if stats.get('duration_seconds', 0) > 0:
-                try:
-                    console.print(Panel(
-                        _format_performance_stats(stats),
-                        title="Performance Statistics",
-                        border_style="green"
-                    ))
-                except (ValueError, OSError):
-                    # Fallback to simple print if Rich console fails
-                    print(f"Generated {stats['total_logs_generated']} logs in {stats['duration_seconds']:.2f}s")
+                console.print(Panel(
+                    _format_performance_stats(stats),
+                    title="Performance Statistics",
+                    border_style="green"
+                ))
     
     except Exception as e:
-        try:
-            console.print(f"❌ Error: {e}", style="red")
-            verbose = ctx.obj.get('verbose') if ctx.obj else False
-            if verbose:
-                import traceback
-                console.print(traceback.format_exc())
-        except (ValueError, OSError):
-            # Fallback if Rich console fails
-            print(f"ERROR: {e}")
-            verbose = ctx.obj.get('verbose') if ctx.obj else False
-            if verbose:
-                import traceback
-                traceback.print_exc()
+        console.print(f"❌ Error: {e}", style="red")
+        verbose = ctx.obj.get('verbose') if ctx.obj else False
+        if verbose:
+            import traceback
+            console.print(traceback.format_exc())
         sys.exit(1)
 
 
@@ -437,26 +469,33 @@ def _show_config_summary(config: LogConfig):
 def _generate_with_progress(generator: LogGenerator, config: LogConfig):
     """Generate logs with progress bar."""
     
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-        TextColumn("•"),
-        TextColumn("[progress.completed]{task.completed:,}/{task.total:,}"),
-        TextColumn("•"),
-        TimeRemainingColumn(),
-        console=console,
-        transient=False
-    ) as progress:
+    try:
+        # Use the rich console if available
+        rich_console = console._console if console._console else None
         
-        task = progress.add_task("Generating logs...", total=config.total_logs)
-        
-        def progress_callback(percentage: float, logs_generated: int):
-            progress.update(task, completed=logs_generated)
-            generator.performance_monitor.log_progress(logs_generated)
-        
-        generator.generate(progress_callback)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TextColumn("•"),
+            TextColumn("[progress.completed]{task.completed:,}/{task.total:,}"),
+            TextColumn("•"),
+            TimeRemainingColumn(),
+            console=rich_console,
+            transient=False
+        ) as progress:
+            
+            task = progress.add_task("Generating logs...", total=config.total_logs)
+            
+            def progress_callback(percentage: float, logs_generated: int):
+                progress.update(task, completed=logs_generated)
+                generator.performance_monitor.log_progress(logs_generated)
+            
+            generator.generate(progress_callback)
+    except (ValueError, OSError, AttributeError):
+        # Fallback: generate without progress bar if Rich fails
+        generator.generate()
 
 
 def _format_performance_stats(stats: Dict[str, Any]) -> str:

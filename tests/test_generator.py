@@ -2,6 +2,7 @@
 
 import tempfile
 import json
+import sys
 from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import Mock, patch
@@ -46,7 +47,7 @@ class TestLogGenerator:
         assert "level" in log_entry
         assert "message" in log_entry
         assert isinstance(log_entry["timestamp"], datetime)
-        assert log_entry["level"] in config.log_levels
+        assert log_entry["level"] in config.level_distribution.levels
         assert isinstance(log_entry["message"], str)
     
     def test_generate_single_log_with_params(self):
@@ -134,9 +135,12 @@ class TestLogGenerator:
         config = LogConfig(total_logs=10)
         generator = LogGenerator(config)
         
-        with patch('sys.stdout') as mock_stdout:
+        # Mock the generator's formatter to avoid actual stdout writing
+        with patch.object(generator, '_get_output_file') as mock_output:
+            mock_file = Mock()
+            mock_output.return_value = mock_file
             generator.generate_sequential()
-            assert mock_stdout.write.called
+            assert mock_file.write.called
     
     def test_generate_with_progress_callback(self):
         """Test generation with progress callback."""
@@ -402,7 +406,7 @@ class TestLogGenerator:
         
         # All levels should be valid
         for level in levels:
-            assert level in config.log_levels
+            assert level in config.level_distribution.levels
     
     def test_message_generation(self):
         """Test message generation variety."""
@@ -625,3 +629,183 @@ class TestLogGenerator:
         # Basic config should not generate warnings
         assert isinstance(warnings, list)
         # Anomaly-specific warnings would be added here if needed
+
+
+class TestTimestampGeneration:
+    """Test timestamp generation functionality."""
+    
+    def test_uniform_timestamp_distribution(self):
+        """Test uniform timestamp distribution."""
+        config = LogConfig(total_logs=100)
+        config.time.interval = "uniform"
+        config.performance.precompute_timestamps = True
+        
+        generator = LogGenerator(config)
+        
+        # Should have generated timestamps
+        assert generator.timestamps is not None
+        assert len(generator.timestamps) == 100
+        
+        # Timestamps should be datetime objects
+        assert all(isinstance(ts, datetime) for ts in generator.timestamps)
+        
+        # Should be sorted
+        timestamps_list = list(generator.timestamps)
+        assert timestamps_list == sorted(timestamps_list)
+    
+    def test_exponential_timestamp_distribution(self):
+        """Test exponential timestamp distribution."""
+        config = LogConfig(total_logs=100)
+        config.time.interval = "exponential"
+        config.performance.precompute_timestamps = True
+        
+        generator = LogGenerator(config)
+        
+        assert generator.timestamps is not None
+        assert len(generator.timestamps) == 100
+        assert all(isinstance(ts, datetime) for ts in generator.timestamps)
+    
+    def test_normal_timestamp_distribution(self):
+        """Test normal timestamp distribution."""
+        config = LogConfig(total_logs=100)
+        config.time.interval = "normal"
+        config.performance.precompute_timestamps = True
+        
+        generator = LogGenerator(config)
+        
+        assert generator.timestamps is not None
+        assert len(generator.timestamps) == 100
+        assert all(isinstance(ts, datetime) for ts in generator.timestamps)
+    
+    def test_jitter_timestamp_generation(self):
+        """Test timestamp generation with jitter."""
+        config = LogConfig(total_logs=50)
+        config.time.interval = 1.0  # Regular interval
+        config.time.jitter = 0.2  # 20% jitter
+        config.performance.precompute_timestamps = True
+        
+        generator = LogGenerator(config)
+        
+        assert generator.timestamps is not None
+        assert len(generator.timestamps) == 50
+        
+        # With jitter, timestamps should still be sorted but not perfectly spaced
+        timestamps_list = list(generator.timestamps)
+        assert timestamps_list == sorted(timestamps_list)
+
+
+class TestCompressionSupport:
+    """Test compression functionality."""
+    
+    def test_gzip_compression(self):
+        """Test gzip compression support."""
+        config = LogConfig(total_logs=5)
+        config.output.compression = "gzip"
+        
+        generator = LogGenerator(config)
+        
+        # Test that gzip file handle is returned
+        with tempfile.NamedTemporaryFile(suffix='.gz', delete=False) as f:
+            temp_path = Path(f.name)
+        
+        try:
+            file_handle = generator._get_output_file(temp_path)
+            assert hasattr(file_handle, 'write')
+            file_handle.write("test")
+            file_handle.close()
+            
+            # Verify file was created
+            assert temp_path.exists()
+        finally:
+            if temp_path.exists():
+                temp_path.unlink()
+    
+    def test_bz2_compression(self):
+        """Test bz2 compression support."""
+        config = LogConfig(total_logs=5)
+        config.output.compression = "bz2"
+        
+        generator = LogGenerator(config)
+        
+        with tempfile.NamedTemporaryFile(suffix='.bz2', delete=False) as f:
+            temp_path = Path(f.name)
+        
+        try:
+            file_handle = generator._get_output_file(temp_path)
+            assert hasattr(file_handle, 'write')
+            file_handle.write("test")
+            file_handle.close()
+            
+            assert temp_path.exists()
+        finally:
+            if temp_path.exists():
+                temp_path.unlink()
+    
+    def test_lzma_compression(self):
+        """Test lzma compression support."""
+        config = LogConfig(total_logs=5)
+        config.output.compression = "lzma"
+        
+        generator = LogGenerator(config)
+        
+        with tempfile.NamedTemporaryFile(suffix='.xz', delete=False) as f:
+            temp_path = Path(f.name)
+        
+        try:
+            file_handle = generator._get_output_file(temp_path)
+            assert hasattr(file_handle, 'write')
+            file_handle.write("test")
+            file_handle.close()
+            
+            assert temp_path.exists()
+        finally:
+            if temp_path.exists():
+                temp_path.unlink()
+
+
+class TestGeneratorEdgeCases:
+    """Test edge cases and error conditions."""
+    
+    def test_no_compression(self):
+        """Test file generation without compression."""
+        config = LogConfig(total_logs=5)
+        config.output.compression = None
+        
+        generator = LogGenerator(config)
+        
+        with tempfile.NamedTemporaryFile(suffix='.log', delete=False) as f:
+            temp_path = Path(f.name)
+        
+        try:
+            file_handle = generator._get_output_file(temp_path)
+            assert hasattr(file_handle, 'write')
+            file_handle.write("test")
+            file_handle.close()
+            
+            assert temp_path.exists()
+        finally:
+            if temp_path.exists():
+                temp_path.unlink()
+    
+    def test_stdout_output(self):
+        """Test stdout output handling."""
+        config = LogConfig(total_logs=5)
+        generator = LogGenerator(config)
+        
+        # Should return sys.stdout when no file path
+        file_handle = generator._get_output_file(None)
+        assert file_handle == sys.stdout
+    
+    def test_format_complexity_estimation(self):
+        """Test format complexity in time estimation."""
+        formats_to_test = ["json", "apache_common", "syslog", "gelf", "cef"]
+        
+        for format_name in formats_to_test:
+            config = LogConfig(total_logs=1000)
+            config.output.format = format_name
+            
+            generator = LogGenerator(config)
+            estimated_time = generator.estimate_generation_time()
+            
+            assert isinstance(estimated_time, float)
+            assert estimated_time > 0

@@ -341,8 +341,10 @@ class CustomFormatter(BaseFormatter):
         try:
             return self.template.format(**formatted_entry)
         except KeyError as e:
-            # Handle missing keys gracefully
-            return self.template.format_map(formatted_entry)
+            # Handle missing keys gracefully with a defaultdict-like behavior
+            from collections import defaultdict
+            safe_entry = defaultdict(lambda: f"<missing:{str(e).strip('\'')}>", formatted_entry)
+            return self.template.format_map(safe_entry)
     
     def get_headers(self) -> Optional[str]:
         return None
