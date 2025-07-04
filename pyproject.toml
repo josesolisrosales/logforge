@@ -1,0 +1,140 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "logsmith"
+dynamic = ["version"]
+description = "A high-performance, professional-grade log generator for testing, simulation, and development"
+readme = "README.md"
+license = {file = "LICENSE"}
+authors = [
+    {name = "Jose Solis", email = "jose.solisrosales@gmail.com"},
+]
+keywords = ["logging", "log-generator", "testing", "simulation", "performance"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Testing",
+    "Topic :: System :: Logging",
+    "Topic :: System :: Systems Administration",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "click>=8.0.0",
+    "pydantic>=2.0.0",
+    "rich>=13.0.0",
+    "faker>=18.0.0",
+    "orjson>=3.9.0",
+    "numpy>=1.24.0",
+    "psutil>=5.9.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "flake8>=6.0.0",
+    "mypy>=1.5.0",
+    "pre-commit>=3.0.0",
+]
+docs = [
+    "mkdocs>=1.5.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocs-click>=0.8.0",
+]
+performance = [
+    "psutil>=5.9.0",
+    "memory-profiler>=0.60.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/josesolisrosales/logsmith"
+Repository = "https://github.com/josesolisrosales/logsmith"
+Issues = "https://github.com/josesolisrosales/logsmith/issues"
+Documentation = "https://logsmith.readthedocs.io"
+
+[project.scripts]
+logsmith = "logsmith.cli:main"
+
+[tool.hatch.version]
+path = "src/logsmith/__about__.py"
+
+[tool.hatch.build.targets.sdist]
+exclude = [
+    "/.github",
+    "/docs",
+    "/tests",
+    "/.gitignore",
+    "/.pre-commit-config.yaml",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/logsmith"]
+
+[tool.black]
+target-version = ["py38"]
+line-length = 88
+skip-string-normalization = true
+
+[tool.isort]
+profile = "black"
+known_first_party = ["logsmith"]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "--cov=logsmith",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+    "--strict-markers",
+    "--disable-warnings",
+]
+
+[tool.coverage.run]
+source = ["src/logsmith"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
