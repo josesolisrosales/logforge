@@ -9,16 +9,16 @@ import pytest
 from pydantic import ValidationError
 
 from logforge.core.config import (
+    AnomalyConfig,
+    AnomalyPatternConfig,
+    AnomalyType,
+    AnomalyTypeConfig,
     LogConfig,
     LogLevelDistribution,
-    TimeConfig,
     OutputConfig,
     PerformanceConfig,
-    AnomalyConfig,
-    AnomalyType,
     TemporalPattern,
-    AnomalyPatternConfig,
-    AnomalyTypeConfig,
+    TimeConfig,
 )
 
 

@@ -3,17 +3,17 @@
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, Mock
+from unittest.mock import Mock, patch
 
 from click.testing import CliRunner
 
 from logforge.cli import (
+    benchmark,
     cli,
     generate,
-    benchmark,
     init_config,
-    validate_config,
     list_formats,
+    validate_config,
 )
 
 

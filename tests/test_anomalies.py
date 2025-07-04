@@ -1,20 +1,21 @@
 """Tests for anomaly injection system."""
 
-import pytest
 from datetime import datetime, timedelta
 from unittest.mock import patch
 
+import pytest
+
 from logforge.core.config import (
     AnomalyConfig,
+    AnomalyPatternConfig,
     AnomalyType,
     TemporalPattern,
-    AnomalyPatternConfig,
 )
 from logforge.generators.anomalies import (
+    AnomalyEvent,
     AnomalyInjector,
     TemporalPatternGenerator,
     parse_duration,
-    AnomalyEvent,
 )
 
 

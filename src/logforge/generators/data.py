@@ -1,7 +1,7 @@
 """Data generators for realistic log content."""
 
 import random
-from typing import Dict, Any
+from typing import Any, Dict
 
 from faker import Faker
 

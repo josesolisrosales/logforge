@@ -3,8 +3,8 @@
 import json
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Dict, Any, List, Optional, Union
 from enum import Enum
+from typing import Any, Dict, List, Optional, Union
 
 import orjson
 

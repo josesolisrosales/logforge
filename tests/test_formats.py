@@ -6,19 +6,19 @@ from datetime import datetime
 import pytest
 
 from logforge.core.formats import (
-    LogFormat,
-    FormatterFactory,
-    StandardFormatter,
-    JSONFormatter,
-    ApacheCommonFormatter,
     ApacheCombinedFormatter,
-    NginxFormatter,
-    SyslogFormatter,
-    CSVFormatter,
-    LogfmtFormatter,
-    GELFFormatter,
+    ApacheCommonFormatter,
     CEFFormatter,
+    CSVFormatter,
     CustomFormatter,
+    FormatterFactory,
+    GELFFormatter,
+    JSONFormatter,
+    LogfmtFormatter,
+    LogFormat,
+    NginxFormatter,
+    StandardFormatter,
+    SyslogFormatter,
 )
 
 

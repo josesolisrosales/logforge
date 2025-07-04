@@ -1,23 +1,23 @@
 """High-performance log generator core."""
 
-import gzip
 import bz2
+import gzip
 import lzma
 import multiprocessing as mp
+import random
+import sys
 from concurrent.futures import ProcessPoolExecutor
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Iterator, List, Dict, Any, Optional, TextIO
-import random
-import sys
+from typing import Any, Dict, Iterator, List, Optional, TextIO
 
 import numpy as np
 from faker import Faker
 
 from logforge.core.config import LogConfig
 from logforge.core.formats import FormatterFactory, LogFormat
-from logforge.generators.data import DataGenerator
 from logforge.generators.anomalies import AnomalyInjector
+from logforge.generators.data import DataGenerator
 from logforge.utils.performance import PerformanceMonitor
 
 

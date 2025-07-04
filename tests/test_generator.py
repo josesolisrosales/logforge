@@ -1,12 +1,11 @@
 """Tests for log generator module."""
 
-import tempfile
 import json
 import sys
+import tempfile
 from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, patch
-
 
 from logforge.core.config import LogConfig
 from logforge.core.generator import LogGenerator

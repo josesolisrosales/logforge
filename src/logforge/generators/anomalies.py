@@ -2,16 +2,16 @@
 
 import random
 import re
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, Set
 
 from logforge.core.config import (
     AnomalyConfig,
-    AnomalyType,
-    TemporalPattern,
     AnomalyPatternConfig,
+    AnomalyType,
     AnomalyTypeConfig,
+    TemporalPattern,
 )
 
 

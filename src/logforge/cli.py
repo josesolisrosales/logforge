@@ -1,25 +1,25 @@
 """Command-line interface for LogForge."""
 
-import sys
 import json
+import sys
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any, Dict
 
 import click
 from rich.console import Console
+from rich.panel import Panel
 from rich.progress import (
+    BarColumn,
     Progress,
     SpinnerColumn,
     TextColumn,
-    BarColumn,
     TimeRemainingColumn,
 )
 from rich.table import Table
-from rich.panel import Panel
 
 from logforge.core.config import LogConfig
-from logforge.core.generator import LogGenerator
 from logforge.core.formats import FormatterFactory
+from logforge.core.generator import LogGenerator
 from logforge.utils.performance import BenchmarkRunner
 
 

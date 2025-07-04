@@ -1,10 +1,11 @@
 """Performance monitoring utilities."""
 
-import time
-import psutil
 import threading
-from typing import Dict, Any, Optional, List
+import time
 from collections import defaultdict
+from typing import Any, Dict, List, Optional
+
+import psutil
 
 
 class PerformanceMonitor:
