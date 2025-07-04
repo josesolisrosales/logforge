@@ -18,17 +18,12 @@ classifiers = [
     "Intended Audience :: System Administrators",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Topic :: Software Development :: Testing",
     "Topic :: System :: Logging",
     "Topic :: System :: Systems Administration",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 dependencies = [
     "click>=8.0.0",
     "pydantic>=2.0.0",
@@ -93,7 +88,7 @@ profile = "black"
 known_first_party = ["logforge"]
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
