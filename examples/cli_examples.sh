@@ -12,12 +12,12 @@ mkdir -p examples/output
 
 echo "1. Basic log generation"
 echo "----------------------"
-logsmith generate --count 1000 --format standard --output examples/output/basic.log
+logforge generate --count 1000 --format standard --output examples/output/basic.log
 echo ""
 
 echo "2. JSON logs with custom fields"
 echo "------------------------------"
-logsmith generate \
+logforge generate \
   --count 5000 \
   --format json \
   --output examples/output/json_logs.json \
@@ -26,7 +26,7 @@ echo ""
 
 echo "3. Apache access logs"
 echo "--------------------"
-logsmith generate \
+logforge generate \
   --count 10000 \
   --format apache_combined \
   --output examples/output/access.log \
@@ -36,7 +36,7 @@ echo ""
 
 echo "4. Compressed syslog"
 echo "-------------------"
-logsmith generate \
+logforge generate \
   --count 25000 \
   --format syslog \
   --output examples/output/system.log \
@@ -45,7 +45,7 @@ echo ""
 
 echo "5. High-performance generation"
 echo "-----------------------------"
-logsmith generate \
+logforge generate \
   --count 100000 \
   --format json \
   --output examples/output/high_perf.json \
@@ -56,7 +56,7 @@ echo ""
 
 echo "6. Custom log level distribution"
 echo "-------------------------------"
-logsmith generate \
+logforge generate \
   --count 5000 \
   --format json \
   --output examples/output/custom_dist.json \
@@ -65,7 +65,7 @@ echo ""
 
 echo "7. CSV format for analysis"
 echo "-------------------------"
-logsmith generate \
+logforge generate \
   --count 10000 \
   --format csv \
   --output examples/output/analysis.csv
@@ -73,7 +73,7 @@ echo ""
 
 echo "8. Nginx logs with time patterns"
 echo "-------------------------------"
-logsmith generate \
+logforge generate \
   --count 20000 \
   --format nginx \
   --output examples/output/nginx.log \
@@ -85,7 +85,7 @@ echo "9. Multiple compression formats"
 echo "-----------------------------"
 for compression in gzip bz2 lzma; do
   echo "  Generating with $compression compression..."
-  logsmith generate \
+  logforge generate \
     --count 5000 \
     --format json \
     --output examples/output/compressed_${compression}.json \
@@ -125,31 +125,31 @@ cat > examples/output/example_config.json << EOF
 }
 EOF
 
-logsmith generate --config examples/output/example_config.json
+logforge generate --config examples/output/example_config.json
 echo ""
 
 echo "11. Validation and initialization"
 echo "--------------------------------"
 # Initialize a new config
-logsmith init-config --output examples/output/new_config.json --format apache_common --count 50000
+logforge init-config --output examples/output/new_config.json --format apache_common --count 50000
 
 # Validate the config
-logsmith validate-config examples/output/new_config.json
+logforge validate-config examples/output/new_config.json
 echo ""
 
 echo "12. List available formats"
 echo "-------------------------"
-logsmith list-formats
+logforge list-formats
 echo ""
 
 echo "13. Performance benchmark"
 echo "-----------------------"
-logsmith benchmark --count 50000 --format json --iterations 3
+logforge benchmark --count 50000 --format json --iterations 3
 echo ""
 
 echo "14. Large dataset with progress"
 echo "-----------------------------"
-logsmith generate \
+logforge generate \
   --count 200000 \
   --format json \
   --output examples/output/large_dataset.json \
@@ -159,7 +159,7 @@ echo ""
 
 echo "15. GELF format for Graylog"
 echo "--------------------------"
-logsmith generate \
+logforge generate \
   --count 5000 \
   --format gelf \
   --output examples/output/graylog.json \
@@ -168,7 +168,7 @@ echo ""
 
 echo "16. CEF format for security"
 echo "--------------------------"
-logsmith generate \
+logforge generate \
   --count 3000 \
   --format cef \
   --output examples/output/security.log \

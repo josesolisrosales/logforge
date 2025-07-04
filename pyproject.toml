@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "logsmith"
+name = "logforge"
 dynamic = ["version"]
 description = "A high-performance, professional-grade log generator for testing, simulation, and development"
 readme = "README.md"
@@ -60,16 +60,16 @@ performance = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/josesolisrosales/logsmith"
-Repository = "https://github.com/josesolisrosales/logsmith"
-Issues = "https://github.com/josesolisrosales/logsmith/issues"
-Documentation = "https://github.com/josesolisrosales/logsmith#readme"
+Homepage = "https://github.com/josesolisrosales/logforge"
+Repository = "https://github.com/josesolisrosales/logforge"
+Issues = "https://github.com/josesolisrosales/logforge/issues"
+Documentation = "https://github.com/josesolisrosales/logforge#readme"
 
 [project.scripts]
-logsmith = "logsmith.cli:main"
+logforge = "logforge.cli:main"
 
 [tool.hatch.version]
-path = "src/logsmith/__about__.py"
+path = "src/logforge/__about__.py"
 
 [tool.hatch.build.targets.sdist]
 exclude = [
@@ -81,7 +81,7 @@ exclude = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/logsmith"]
+packages = ["src/logforge"]
 
 [tool.black]
 target-version = ["py38"]
@@ -90,7 +90,7 @@ skip-string-normalization = true
 
 [tool.isort]
 profile = "black"
-known_first_party = ["logsmith"]
+known_first_party = ["logforge"]
 
 [tool.mypy]
 python_version = "3.8"
@@ -113,7 +113,7 @@ python_files = ["test_*.py", "*_test.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
-    "--cov=logsmith",
+    "--cov=logforge",
     "--cov-report=term-missing",
     "--cov-report=html",
     "--cov-report=xml",
@@ -122,7 +122,7 @@ addopts = [
 ]
 
 [tool.coverage.run]
-source = ["src/logsmith"]
+source = ["src/logforge"]
 branch = true
 
 [tool.coverage.report]

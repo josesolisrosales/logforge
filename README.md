@@ -1,12 +1,12 @@
-# LogSmith 🔨
+# LogForge 🔨
 
 A high-performance, professional-grade log generator for testing, simulation, and development purposes.
 
-[![PyPI version](https://badge.fury.io/py/logsmith.svg)](https://badge.fury.io/py/logsmith)
-[![Python Support](https://img.shields.io/pypi/pyversions/logsmith.svg)](https://pypi.org/project/logsmith/)
+[![PyPI version](https://badge.fury.io/py/logforge.svg)](https://badge.fury.io/py/logforge)
+[![Python Support](https://img.shields.io/pypi/pyversions/logforge.svg)](https://pypi.org/project/logforge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://github.com/josesolisrosales/logsmith/workflows/Tests/badge.svg)](https://github.com/josesolisrosales/logsmith/actions)
-[![Code Quality](https://github.com/josesolisrosales/logsmith/workflows/Code%20Quality/badge.svg)](https://github.com/josesolisrosales/logsmith/actions)
+[![Tests](https://github.com/josesolisrosales/logforge/workflows/Tests/badge.svg)](https://github.com/josesolisrosales/logforge/actions)
+[![Code Quality](https://github.com/josesolisrosales/logforge/workflows/Code%20Quality/badge.svg)](https://github.com/josesolisrosales/logforge/actions)
 
 ## 🚀 Features
 
@@ -24,7 +24,7 @@ A high-performance, professional-grade log generator for testing, simulation, an
 ## 📦 Installation
 
 ```bash
-pip install logsmith
+pip install logforge
 ```
 
 
@@ -35,13 +35,13 @@ pip install logsmith
 Generate 1 million logs in JSON format:
 
 ```bash
-logsmith generate --count 1000000 --format json --output logs.json
+logforge generate --count 1000000 --format json --output logs.json
 ```
 
 Generate Apache access logs with compression:
 
 ```bash
-logsmith generate \
+logforge generate \
   --count 500000 \
   --format apache_common \
   --output access.log \
@@ -51,13 +51,13 @@ logsmith generate \
 Run performance benchmark:
 
 ```bash
-logsmith benchmark --count 1000000 --format json
+logforge benchmark --count 1000000 --format json
 ```
 
 ### Python API Usage
 
 ```python
-from logsmith import LogGenerator, LogConfig
+from logforge import LogGenerator, LogConfig
 
 # Basic usage
 config = LogConfig(total_logs=10000, output={"format": "json"})
@@ -174,19 +174,19 @@ Create a configuration file (`config.json`):
 Use with CLI:
 
 ```bash
-logsmith generate --config config.json
+logforge generate --config config.json
 ```
 
 Or initialize a config file:
 
 ```bash
-logsmith init-config --output my-config.json --format json --count 1000000
+logforge init-config --output my-config.json --format json --count 1000000
 ```
 
 ### CLI Options
 
 ```bash
-logsmith generate --help
+logforge generate --help
 ```
 
 Key options:
@@ -247,21 +247,21 @@ Peak CPU: 106.5%
 Run your own benchmark:
 
 ```bash
-logsmith benchmark --count 10000000 --format json --iterations 3
+logforge benchmark --count 10000000 --format json --iterations 3
 ```
 
 ## 🔍 Anomaly Detection
 
-LogSmith includes advanced anomaly injection capabilities for ML training data generation:
+LogForge includes advanced anomaly injection capabilities for ML training data generation:
 
 ### Generate Logs with Anomalies
 
 ```bash
 # Enable anomaly injection with 20% anomaly rate
-logsmith generate --count 10000 --anomalies --anomaly-rate 0.2 --seed 42
+logforge generate --count 10000 --anomalies --anomaly-rate 0.2 --seed 42
 
 # Use external anomaly configuration
-logsmith generate --count 10000 --anomaly-config anomaly_config.json
+logforge generate --count 10000 --anomaly-config anomaly_config.json
 ```
 
 ### Anomaly Types
@@ -304,14 +304,14 @@ logsmith generate --count 10000 --anomaly-config anomaly_config.json
 
 ```bash
 # Apache access logs
-logsmith generate \
+logforge generate \
   --count 1000000 \
   --format apache_combined \
   --output access.log \
   --duration 7d
 
 # Nginx logs with realistic traffic patterns
-logsmith generate \
+logforge generate \
   --count 5000000 \
   --format nginx \
   --output nginx.log \
@@ -323,7 +323,7 @@ logsmith generate \
 
 ```bash
 # JSON application logs
-logsmith generate \
+logforge generate \
   --count 100000 \
   --format json \
   --custom-fields '{"app": "api", "version": "2.1.0"}' \
@@ -335,7 +335,7 @@ logsmith generate \
 
 ```bash
 # Syslog format
-logsmith generate \
+logforge generate \
   --count 50000 \
   --format syslog \
   --output system.log \
@@ -346,7 +346,7 @@ logsmith generate \
 
 ```bash
 # CSV format for data analysis
-logsmith generate \
+logforge generate \
   --count 10000 \
   --format csv \
   --output logs.csv
@@ -357,8 +357,8 @@ logsmith generate \
 ### Setup Development Environment
 
 ```bash
-git clone https://github.com/yourusername/logsmith.git
-cd logsmith
+git clone https://github.com/josesolisrosales/logforge.git
+cd logforge
 pip install -e .[dev]
 ```
 
@@ -406,4 +406,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**LogSmith** - Forge logs like a master craftsman! 🔨⚡
+**LogForge** - Forge logs like a master craftsman! 🔨⚡

@@ -12,9 +12,9 @@ import tempfile
 from datetime import datetime, timedelta
 from pathlib import Path
 
-from logsmith import LogGenerator, LogConfig
-from logsmith.core.formats import FormatterFactory, CustomFormatter
-from logsmith.utils.performance import BenchmarkRunner
+from logforge import LogGenerator, LogConfig
+from logforge.core.formats import FormatterFactory, CustomFormatter
+from logforge.utils.performance import BenchmarkRunner
 
 
 def configuration_file_example():

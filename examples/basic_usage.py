@@ -9,7 +9,7 @@ for generating logs programmatically.
 from datetime import timedelta
 from pathlib import Path
 
-from logsmith import LogGenerator, LogConfig
+from logforge import LogGenerator, LogConfig
 
 
 def basic_example():
