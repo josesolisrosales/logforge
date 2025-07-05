@@ -2,7 +2,7 @@
 
 A high-performance, professional-grade log generator for testing, simulation, and development purposes.
 
-[![PyPI version](https://badge.fury.io/py/logforge.svg)](https://badge.fury.io/py/logforge)
+[![PyPI version](https://badge.fury.io/py/logforge.svg?icon=si%3Apython)](https://badge.fury.io/py/logforge)
 [![Python Support](https://img.shields.io/pypi/pyversions/logforge.svg)](https://pypi.org/project/logforge/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Tests](https://github.com/josesolisrosales/logforge/workflows/Tests/badge.svg)](https://github.com/josesolisrosales/logforge/actions)
